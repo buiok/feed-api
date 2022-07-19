@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Message;
 use App\Http\Requests\MessageRequest;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
 
 class MessageController extends Controller
 {
@@ -27,29 +27,49 @@ class MessageController extends Controller
      */
     public function store(MessageRequest $request): JsonResponse
     {
-        $message = Message::create($request->all());
+        $message = Message::create([
+            'text' => $request->text,
+            'user_id' => auth()->user()->id,
+        ]);
         return response()->json($message,201);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param Message $message
+     * @param $id
      * @return JsonResponse
      */
-    public function show(Message $message): JsonResponse
+    public function show($id): JsonResponse
     {
+        $message = Message::find($id);
+        if ( is_null($message) ) {
+            return response()->json(['error' => true, 'message' => 'Not found'], 404);
+        }
         return response()->json($message,200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param Message $message
-     * @return Response
+     * @param $id
+     * @return JsonResponse
      */
-    public function destroy(Message $message)
+    public function destroy($id): JsonResponse
     {
-        //
+        $message = Message::find($id);
+
+        if ( is_null($message) ) {
+            return response()->json(['error' => true, 'message' => 'Not found'], 404);
+        }
+
+        if (auth()->user()->id === $message->user_id) {
+            if ( (Carbon::parse($message->created_at)->diffInHours(Carbon::now(),false)) <= 24 ) {
+                $message->delete();
+                return response()->json('', 204);
+            }
+            return response()->json(['error' => true, 'message' => 'Forbidden'], 403);
+        }
+        return response()->json(['error' => true, 'message' => 'Forbidden'], 403);
     }
 }

@@ -28,14 +28,12 @@ class MessageRequest extends FormRequest
     {
         return [
             'text' => 'required|min:1',
-            'user_id' => 'required|exists:users,id|integer',
         ];
     }
 
     protected function failedValidation(Validator $validator): void
     {
         $errors = $validator->errors();
-
         throw new HttpResponseException(response()->json([
             'errors' => $errors
         ], Response::HTTP_UNPROCESSABLE_ENTITY));
