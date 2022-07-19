@@ -40,5 +40,4 @@ class MessageRequest extends FormRequest
             'errors' => $errors
         ], Response::HTTP_UNPROCESSABLE_ENTITY));
     }
-
 }
