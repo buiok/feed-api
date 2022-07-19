@@ -24,5 +24,5 @@ Route::post('register', [PassportAuthController::class, 'register']);
 Route::post('login', [PassportAuthController::class, 'login']);
 
 Route::middleware('auth:api')->group(function () {
-    Route::apiResource('messages', MessageController::class);
+    Route::apiResource('messages', MessageController::class)->except('update');
 });
