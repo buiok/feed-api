@@ -3,6 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\Response;
 
 class MessageRequest extends FormRequest
 {
@@ -28,4 +31,14 @@ class MessageRequest extends FormRequest
             'user_id' => 'required|exists:users,id|integer',
         ];
     }
+
+    protected function failedValidation(Validator $validator): void
+    {
+        $errors = $validator->errors();
+
+        throw new HttpResponseException(response()->json([
+            'errors' => $errors
+        ], Response::HTTP_UNPROCESSABLE_ENTITY));
+    }
+
 }
